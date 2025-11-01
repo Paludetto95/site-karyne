@@ -162,55 +162,86 @@ nav ul li a:hover::after, nav ul li a.active::after {
     color: var(--primary);
 }
 
-/* Banner */
 .banner {
-    padding: 80px 0;
-    background: linear-gradient(135deg, var(--light-gray) 0%, var(--white) 100%);
+    padding: 0px 0;
+    /* Alterado: Removendo o gradiente de fundo para que o background seja apenas a cor base */
+    background-color: var(--background); 
+    position: relative; /* Adicionado: Para permitir posicionamento do gradiente */
+    overflow: hidden; /* Adicionado: Para que a imagem/efeito que 'vazam' não causem scroll horizontal */
 }
 
 .banner .container {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    /* min-height: 550px; */ /* Removido para a imagem ditar a altura */
 }
 
 .banner-content {
-    flex: 1;
+    flex-basis: 55%;
+    padding-left: 10%; /* Aumentado para mover o texto para a direita */
     padding-right: 40px;
+    z-index: 2; /* Adicionado: Para garantir que o conteúdo fique sobre o efeito de gradiente/imagem */
+}
+
+.banner-image {
+    flex-basis: 65%;
+    margin-left: -20%;
+    position: relative; /* Adicionado: Necessário para posicionar o pseudo-elemento com o gradiente */
+    overflow: hidden;
+    align-self: flex-start;
+}
+
+.banner-image img {
+    /* Alterado: Removendo estilos de borda/sombra para o efeito de tela cheia/blended */
+    /* Adicionado: Garantindo que a imagem ocupe 100% do container e use object-fit: cover */
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* A imagem será contida dentro do container, mostrando-a por inteiro */
+    border-radius: 0;
+    box-shadow: none;
+    display: block;
+}
+
+/* Efeito Linear (Gradiente de Transição) */
+.banner-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%; /* Reduzido para um efeito menor */
+    height: 100%;
+    /* Gradiente suave em uma área menor */
+    background: linear-gradient(to right, var(--background) 5%, rgba(255, 255, 255, 0) 85%);
+    z-index: 1; /* Fica acima da imagem */
 }
 
 .banner-content h2 {
-    font-size: 2.5rem;
+    font-size: 3rem;
     margin-bottom: 20px;
+    letter-spacing: -1px;
     color: var(--dark-text);
 }
 
 .banner-content p {
-    font-size: 1.1rem;
     margin-bottom: 30px;
+    letter-spacing: -0.5px;
     color: var(--medium-gray);
-}
-
-.banner-image {
-    flex: 1;
-    text-align: center;
-}
-
-.banner-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 /* Sobre */
 .sobre {
-    padding: 80px 0;
+    padding: 120px 0;
     background-color: var(--background);
 }
 
 .sobre h2 {
     text-align: center;
+    padding-left: 450px;
+    padding-right: 450p
     margin-bottom: 40px;
     position: relative;
 }
@@ -228,8 +259,8 @@ nav ul li a:hover::after, nav ul li a.active::after {
 
 .sobre-content {
     display: flex;
-    align-items: center;
-    gap: 40px;
+    align-items: right;
+    gap: 20px;
 }
 
 .sobre-image {
@@ -238,14 +269,16 @@ nav ul li a:hover::after, nav ul li a.active::after {
 }
 
 .sobre-image img {
-    max-width: 100%;
+    max-width: 85%;
     border-radius: 50%;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     border: 5px solid var(--light-blue);
+    transform: translateY(-20px);
 }
 
 .sobre-text {
     flex: 2;
+    text-align: center;
 }
 
 .sobre-text p {
@@ -541,20 +574,43 @@ footer {
     .sobre-content {
         flex-direction: column;
     }
-    
-    .banner-content,
-    .banner-image,
-    .sobre-image,
-    .sobre-text {
-        flex: 1;
-        width: 100%;
+
+    /* Regras de banner atualizadas para mobile */
+    .banner .container {
+        flex-direction: column;
+        min-height: auto; 
+        padding-top: 40px;
+        padding-bottom: 40px;
     }
-    
+
     .banner-content {
+        flex: auto;
+        max-width: 100%;
         padding-right: 0;
         margin-bottom: 40px;
         text-align: center;
     }
+    
+    .banner-image {
+        flex: auto;
+        max-width: 100%;
+        height: 350px; /* Altura menor para mobile */
+        order: 2; /* Move a imagem para baixo do conteúdo em mobile */
+    }
+
+    /* Efeito Linear (Gradiente) para Mobile (transição na parte inferior) */
+    .banner-image::before {
+        content: '';
+        width: 100%;
+        height: 30%; 
+        top: auto;
+        bottom: 0;
+        left: 0;
+        /* Gradiente do fundo do banner (branco) para transparente, vindo de baixo para cima */
+        background: linear-gradient(to top, var(--background) 20%, rgba(255, 255, 255, 0) 80%);
+        z-index: 1;
+    }
+    /* Fim das regras de banner atualizadas para mobile */
     
     .sobre-image {
         margin-bottom: 30px;
