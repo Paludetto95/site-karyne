@@ -1,61 +1,68 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Menu mobile toggle
+    // Menu mobile toggle - Otimizado
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
     
-    if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
+    if (menuToggle && nav) {
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
             nav.classList.toggle('active');
         });
-    }
-    
-    // Máscara para campos do formulário
-    const cpfInput = document.getElementById('cpf');
-    const rgInput = document.getElementById('rg');
-    const telefoneInput = document.getElementById('telefone');
-    const whatsappInput = document.getElementById('whatsapp');
-    
-    if (cpfInput) {
-        cpfInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.slice(0, 11);
-            
-            if (value.length > 9) {
-                value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
-            } else if (value.length > 6) {
-                value = value.replace(/^(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3");
-            } else if (value.length > 3) {
-                value = value.replace(/^(\d{3})(\d{1,3})$/, "$1.$2");
-            }
-            
-            e.target.value = value;
-        });
-    }
-    
-    if (rgInput) {
-        rgInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 9) value = value.slice(0, 9);
-            
-            if (value.length > 7) {
-                value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{1})$/, "$1.$2.$3-$4");
-            } else if (value.length > 5) {
-                value = value.replace(/^(\d{2})(\d{3})(\d{1,3})$/, "$1.$2.$3");
-            } else if (value.length > 2) {
-                value = value.replace(/^(\d{2})(\d{1,3})$/, "$1.$2");
-            }
-            
-            e.target.value = value;
-        });
-    }
-    
-    function formatTelefone(input) {
-        if (!input) return;
         
-        input.addEventListener('input', function(e) {
+        // Fechar menu ao clicar em um link
+        nav.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                nav.classList.remove('active');
+            }
+        });
+        
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!menuToggle.contains(e.target) && !nav.contains(e.target)) {
+                nav.classList.remove('active');
+            }
+        });
+    }
+    
+    // Máscara para campos do formulário - Otimizado e consolidado
+    const maskConfigs = {
+        cpf: { maxLength: 11, pattern: /^(\d{3})(\d{3})(\d{3})(\d{2})$|^(\d{3})(\d{3})(\d{1,3})?$|^(\d{3})(\d{1,3})?$/, format: (v) => {
+            if (v.length > 9) return v.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
+            if (v.length > 6) return v.replace(/^(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3");
+            if (v.length > 3) return v.replace(/^(\d{3})(\d{1,3})$/, "$1.$2");
+            return v;
+        }},
+        rg: { maxLength: 9, format: (v) => {
+            if (v.length > 7) return v.replace(/^(\d{2})(\d{3})(\d{3})(\d{1})$/, "$1.$2.$3-$4");
+            if (v.length > 5) return v.replace(/^(\d{2})(\d{3})(\d{1,3})$/, "$1.$2.$3");
+            if (v.length > 2) return v.replace(/^(\d{2})(\d{1,3})$/, "$1.$2");
+            return v;
+        }},
+        telefone: { maxLength: 11, format: (v) => {
+            if (v.length > 10) return v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+            if (v.length > 6) return v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, "($1) $2-$3");
+            if (v.length > 2) return v.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+            return v;
+        }}
+    };
+    
+    Object.entries(maskConfigs).forEach(([fieldName, config]) => {
+        const input = document.getElementById(fieldName);
+        if (input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > config.maxLength) value = value.slice(0, config.maxLength);
+                e.target.value = config.format(value);
+            });
+        }
+    });
+    
+    // WhatsApp com mesma formatação de telefone
+    const whatsappInput = document.getElementById('whatsapp');
+    if (whatsappInput) {
+        whatsappInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 11) value = value.slice(0, 11);
-            
             if (value.length > 10) {
                 value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
             } else if (value.length > 6) {
@@ -63,56 +70,53 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (value.length > 2) {
                 value = value.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
             }
-            
             e.target.value = value;
         });
     }
     
-    formatTelefone(telefoneInput);
-    formatTelefone(whatsappInput);
-    
-    // Validação e envio do formulário
+    // Validação e envio do formulário - Otimizado
     const agendamentoForm = document.getElementById('agendamento-form');
     
     if (agendamentoForm) {
         agendamentoForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Validação básica
-            const nome = document.getElementById('nome').value.trim();
-            const cpf = document.getElementById('cpf').value.trim();
-            const rg = document.getElementById('rg').value.trim();
-            const idade = document.getElementById('idade').value.trim();
-            const telefone = document.getElementById('telefone').value.trim();
-            const whatsapp = document.getElementById('whatsapp').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const data = document.getElementById('data').value;
-            const hora = document.getElementById('hora').value;
+            // Cache de elementos
+            const formFields = {
+                nome: document.getElementById('nome'),
+                cpf: document.getElementById('cpf'),
+                rg: document.getElementById('rg'),
+                idade: document.getElementById('idade'),
+                telefone: document.getElementById('telefone'),
+                whatsapp: document.getElementById('whatsapp'),
+                email: document.getElementById('email'),
+                data: document.getElementById('data'),
+                hora: document.getElementById('hora')
+            };
             
-            if (!nome || !cpf || !rg || !idade || !telefone || !whatsapp || !email || !data || !hora) {
+            // Validação básica
+            const allFilledFields = Object.values(formFields).every(field => field && field.value.trim());
+            if (!allFilledFields) {
                 alert('Por favor, preencha todos os campos obrigatórios.');
                 return;
             }
             
             // Validação de e-mail
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
+            if (!emailRegex.test(formFields.email.value.trim())) {
                 alert('Por favor, insira um e-mail válido.');
                 return;
             }
             
-            // Preparar dados para envio
+            // Preparar e enviar dados
             const formData = new FormData(agendamentoForm);
             
-            // Enviar dados via fetch API
             fetch('/enviar-agendamento', {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao enviar o formulário');
-                }
+                if (!response.ok) throw new Error('Erro ao enviar');
                 return response.json();
             })
             .then(data => {
@@ -126,20 +130,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Animação de scroll suave para links internos
+    // Animação de scroll suave para links internos - Otimizado
+    function smoothScroll(targetElement) {
+        const headerHeight = document.querySelector('header')?.offsetHeight || 100;
+        const targetPosition = targetElement.offsetTop - headerHeight;
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
+    }
+    
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#') return;
+            
             e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-            
-            const targetElement = document.querySelector(targetId);
+            const targetElement = document.querySelector(href);
             if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 100,
-                    behavior: 'smooth'
-                });
+                smoothScroll(targetElement);
             }
         });
     });
