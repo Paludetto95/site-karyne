@@ -82,5 +82,32 @@
     </div>
 
     <script src="js/script.js" defer></script>
+    
+    <script>
+        (function() {
+            const iframe = document.querySelector('iframe');
+            
+            // Intercepta tentativas de abrir links em nova aba
+            const originalOpen = window.open;
+            window.open = function(url, target, specs) {
+                if (iframe && url) {
+                    iframe.src = url;
+                    return iframe;
+                }
+                return originalOpen.apply(window, arguments);
+            };
+            
+            // Intercepta cliques em links que tentam abrir em nova aba
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && (link.target === '_blank' || link.target === '_new')) {
+                    e.preventDefault();
+                    if (iframe && link.href) {
+                        iframe.src = link.href;
+                    }
+                }
+            }, true);
+        })();
+    </script>
 </body>
 </html>
