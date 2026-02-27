@@ -1,8 +1,40 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Menu mobile toggle - Otimizado
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
-    
+    const header = document.querySelector('header');
+
+    if (header) {
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        const topThreshold = 10;
+        const scrollDeltaThreshold = 14;
+
+        function updateHeaderOnScroll() {
+            const currentScrollY = window.scrollY;
+            const navIsOpen = nav && nav.classList.contains('active');
+
+            if (currentScrollY <= topThreshold || navIsOpen) {
+                header.classList.remove('header-hidden');
+            } else if (currentScrollY > lastScrollY + scrollDeltaThreshold) {
+                header.classList.add('header-hidden');
+            } else if (currentScrollY < lastScrollY - scrollDeltaThreshold) {
+                header.classList.remove('header-hidden');
+            }
+
+            lastScrollY = currentScrollY;
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(updateHeaderOnScroll);
+                ticking = true;
+            }
+        }, { passive: true });
+    }
+
+    // Menu mobile toggle - Otimizado
+
     if (menuToggle && nav) {
         menuToggle.addEventListener('click', function(e) {
             e.stopPropagation();
